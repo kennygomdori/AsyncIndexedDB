@@ -8,7 +8,7 @@ class AsyncIndexedDB {
         Object.seal(this);
     }
 
-    async open() {
+    open() {
         return new Promise((resolve, reject) => {
             const db_request = window.indexedDB.open(this.name, this.version);
             const schema = this.schema;
@@ -26,7 +26,7 @@ class AsyncIndexedDB {
         })
     }
 
-    async query(objectStoreNames = this.db.objectStoreNames, oncomplete, onerror, mode = "readwrite") {
+    query(objectStoreNames = this.db.objectStoreNames, oncomplete, onerror, mode = "readwrite") {
         // returns an ObjectStore proxy whose methods are awaitable.
         // e.g. await this.query().getAll()
         const transaction = this.db.transaction(objectStoreNames, mode);
