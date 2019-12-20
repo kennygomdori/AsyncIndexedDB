@@ -20,7 +20,7 @@ Create a IndexedDB with *db_name* , and the *schema*, the *version* number. *ver
 #### *async* open()
 Initializes the database by opening and applying its *schema* if the database is new, or the *version* has increased.
 #### query(objectStoreNames: Array = this.db.objectStoreNames, mode = "readwrite", oncomplete: Function, onerror: Function)
-Opens a transaction, and creates a ObjectStore proxy. Mode can be either "readwrite" or "readonly". *oncomplete* and *onerror* are called when transaction succeeds and fails, respectively. The proxy has all the properties and methods of the original IDBObjectStore, but the asynchronous equivalents in place of the event-based methods.
+Opens a transaction, and creates a ObjectStore proxy. Mode can be either "readwrite" or "readonly". *oncomplete* and *onerror* are called when transaction succeeds and when it fails, respectively. The proxy has all the properties and methods of the original IDBObjectStore, but the asynchronous equivalents in place of the event-based methods.
 
 #### *async* import(data: Array)
 Import data into the IndexedDB. The data needs to be in a form of nested arrays. `[[objectStoreName1, [..records], keyPath1], [objectStoreName2, [..records], keyPath2], ...]`. *keyPath* is required for every objectStore without a fixed keyPath defined.
