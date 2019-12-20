@@ -25,7 +25,7 @@ Opens a transaction, and creates a ObjectStore proxy. Mode can be either "readwr
 #### *async* import(data: Array)
 Import data into the IndexedDB. The data needs to be in a form of nested arrays. `[[objectStoreName1, [..records], keyPath1], [objectStoreName2, [..records], keyPath2], ...]`. *keyPath* is required for every objectStore without a fixed keyPath defined.
 
-#### *async* export(keyRange, count)
+#### *async* export(keyRange: Array, count: Int)
 Serialize IndexedDB into a nested array form: `[[objectStoreName1, [..records], keyPath1], [objectStoreName2, [..records], keyPath2], ...]`
 that can be easily turned into a Map. If keyRange and/or count are defined, they are used together to form a query, and only the resulting records will be exported. If both are undefined, the entire DB will be exported.
 
