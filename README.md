@@ -42,60 +42,57 @@ These are simple examples, and the difference in code complexity will only incre
 let DBOpenRequest = window.indexedDB.open("blog", 1);
 
 // error
-DBOpenRequest.onerror = function(event) {
-  error_callback(event);
+DBOpenRequest.onerror = function (event) {
+    console.log('failed to open db')
 };
 
 let db;
-DBOpenRequest.onsuccess = function(event) {
-  // store the result of opening the database in the db
-  db = DBOpenRequest.result;
-  success_ callback(db);
+DBOpenRequest.onsuccess = function (event) {
+    // store the result of opening the database in the db
+    db = DBOpenRequest.result;
+    success_callback(db);
 };
 
 // Data definition if a version upgrade is needed.
-DBOpenRequest.onupgradeneeded = function(event) {
-  const db = event.target.result;
-  db.onerror = function(event) {
-    console.log('Error loading database.');
-  };
-  const objectStore = db.createObjectStore("blog_posts", {keyPath: "id", autoIncrement: true});
-	objectStore.createIndex("titleIndex", "title", {unique: false});
-	objectStore.createIndex("timeIndex", "time", {unique: false});
-	}
-  }
+DBOpenRequest.onupgradeneeded = function (event) {
+    const db = event.target.result;
+    db.onerror = function (event) {
+        console.log('Error loading database.');
+    };
+    const objectStore = db.createObjectStore("blog_posts", {keyPath: "id", autoIncrement: true});
+    objectStore.createIndex("titleIndex", "title", {unique: false});
+    objectStore.createIndex("timeIndex", "time", {unique: false});
+};
 
 // put (insert/update) a row into the objectStore (IndexedDB-equivalent of Table)
 function success_callback(db) {
-	let transaction = db.transaction('blog_posts', 'readwrite');
-	let objectStore = transaction.objectStore('blog_posts');
-	let request = objectStore.put({
-                        id: post_id.value,
-                        title: post_title.value,
-                        time: Date.now(),
-                        data: post_body.value
-                    });
-	request.onsuccess = function() {
-		let request = objectStore.getAll();
-		request.onsuccess = function() {
-			for (let record of request.result) {
-				console.log(record);
-			}
-		}
-	}
-	request.onerror = console.log;
-	// do the same thing again using an IDBCursor.
-	request = objectStore.openCursor();
-	request.onsuccess = function(event) {
-		const cursor = event.target.result;
-		while(cursor) {
-			console.log(cursor.value);
-			cursor.continue();
-		}
-	};
+    let transaction = db.transaction('blog_posts', 'readwrite');
+    let objectStore = transaction.objectStore('blog_posts');
+    let request = objectStore.put({
+        id: 1,
+        title: "sample title",
+        time: Date.now(),
+        data: "empty body"
+    });
+    request.onsuccess = function () {
+        let request = objectStore.getAll();
+        request.onsuccess = function () {
+            for (let record of request.result) {
+                console.log(record);
+            }
+        }
+    };
+    request.onerror = console.log;
+    // do the same thing again using an IDBCursor.
+    request = objectStore.openCursor();
+    request.onsuccess = function (event) {
+        const cursor = event.target.result;
+        while (cursor) {
+            console.log(cursor.value);
+            cursor.continue();
+        }
+    };
 }
-
-
 ```
 
 #### AsyncIndexedDB
