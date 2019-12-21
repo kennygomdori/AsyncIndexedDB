@@ -55,7 +55,7 @@ DBOpenRequest.onsuccess = function(event) {
 
 // Data definition if a version upgrade is needed.
 DBOpenRequest.onupgradeneeded = function(event) {
-  var db = event.target.result;
+  const db = event.target.result;
   db.onerror = function(event) {
     console.log('Error loading database.');
   };
@@ -67,7 +67,8 @@ DBOpenRequest.onupgradeneeded = function(event) {
 
 // put (insert/update) a row into the objectStore (IndexedDB-equivalent of Table)
 function success_callback(db) {
-	let objectStore = db.transaction('blog_posts', 'readwrite');
+	let transaction = db.transaction('blog_posts', 'readwrite');
+	let objectStore = transaction.objectStore('blog_posts');
 	let request = objectStore.put({
                         id: post_id.value,
                         title: post_title.value,
