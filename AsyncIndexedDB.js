@@ -73,6 +73,7 @@ class AsyncIndexedDB {
                         // other methods can be used as if they are simple async functions by awaiting.
                         // e.g. await this.query().getAll()
                         const request = obj[prop](...params);
+                        if (!(request instanceof IDBRequest)) return request;
                         return new Promise((resolve, reject) => {
                             request.onsuccess = e => resolve(request.result);
                             request.onerror = e => reject(e);
