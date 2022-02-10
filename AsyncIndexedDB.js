@@ -36,6 +36,8 @@ class AsyncIndexedDB {
     }
 
     objectStore(objectStore) {
+        const wrapper = this;
+
         // convert an IDBObjectStore to an ObjectStore proxy whose methods are awaitable.
         return new Proxy(objectStore, {
             get: function (obj, prop) {
@@ -66,6 +68,10 @@ class AsyncIndexedDB {
                             }
                             request.onerror = e => reject(e);
                         })
+                    }
+                else if (prop === "index")
+                    return function (...params) {
+                        return wrapper.objectStore(objectStore.index(...params));
                     }
                 else
                 // functions that do not return a cursor are just turned into Promises.
