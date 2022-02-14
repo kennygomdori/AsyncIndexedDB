@@ -10,7 +10,7 @@ class AsyncIndexedDB {
 
     open() {
         return new Promise((resolve, reject) => {
-            const db_request = window.indexedDB.open(this.name, this.version);
+            const db_request = indexedDB.open(this.name, this.version);
             const schema = this.schema;
             db_request.onerror = (event) => reject(event);
             db_request.onsuccess = (event) => {
@@ -18,35 +18,30 @@ class AsyncIndexedDB {
                 resolve(this);
             }
             db_request.onupgradeneeded = function (event) {
-                // let objectStore = this.result.createObjectStore("sandbox_saves", {keyPath: "id", autoIncrement: true});
-                // objectStore.createIndex("titleIndex", "title", {unique: false});
-                // objectStore.createIndex("timeIndex", "time", {unique: false});
                 schema(this.result)
             };
         })
     }
 
+    // returns an ObjectStore proxy whose methods are awaitable.
     query(objectStoreNames = this.db.objectStoreNames, oncomplete, onerror, mode = "readwrite") {
-        // returns an ObjectStore proxy whose methods are awaitable.
         // e.g. await this.query().getAll()
         const transaction = this.db.transaction(objectStoreNames, mode);
         if (oncomplete instanceof Function) transaction.oncomplete = oncomplete;
         if (onerror instanceof Function) transaction.onerror = onerror;
-        return this.objectStore(transaction.objectStore(objectStoreNames))
+        return AsyncIndexedDB.proxy(transaction.objectStore(objectStoreNames))
     }
 
-    objectStore(objectStore) {
-        const wrapper = this;
-
-        // convert an IDBObjectStore to an ObjectStore proxy whose methods are awaitable.
-        return new Proxy(objectStore, {
+    static proxy(obj) {
+        // convert an IDBObjectStore and IDBIndex to an ObjectStore proxy whose methods are awaitable.
+        return new Proxy(obj, {
             get: function (obj, prop) {
                 if (!(obj[prop] instanceof Function)) return obj[prop];
-                if (prop === "openCursor" || prop === "openKeyCursor")
-                // When a cursor supposed to be returned, return an AsyncIterable instead.
-                // e.g. for await (let {key, value, primaryKey} of await this.query().openCursor()) { ... }
-                    return function (...params) {
-                        const request = obj[prop](...params);
+                return function (...params) {
+                    const request = obj[prop](...params);
+                    // When a cursor supposed to be returned, return an AsyncIterable instead.
+                    // e.g. for await (let {key, value, primaryKey} of await this.query().openCursor()) { ... }
+                    if (request instanceof IDBCursor)
                         return new Promise((resolve, reject) => {
                             request.onsuccess = e => {
                                 let cursor = request.result;
@@ -54,7 +49,7 @@ class AsyncIndexedDB {
                                     request, cursor,
                                     [Symbol.asyncIterator]: async function* () {
                                         let promise;
-                                        while (cursor = request.result) {
+                                        while (cursor) {
                                             yield {key: cursor.key, value: cursor.value, primaryKey: cursor.primaryKey};
                                             promise = new Promise((resolve, reject) => {
                                                 request.onsuccess = e => resolve()
@@ -62,29 +57,22 @@ class AsyncIndexedDB {
                                             });
                                             cursor.continue();
                                             await promise;
+                                            cursor = request.result
                                         }
                                     }
                                 })
                             }
                             request.onerror = e => reject(e);
                         })
-                    }
-                else if (prop === "index")
-                    return function (...params) {
-                        return wrapper.objectStore(objectStore.index(...params));
-                    }
-                else
-                // functions that do not return a cursor are just turned into Promises.
-                    return function (...params) {
-                        // other methods can be used as if they are simple async functions by awaiting.
-                        // e.g. await this.query().getAll()
-                        const request = obj[prop](...params);
-                        if (!(request instanceof IDBRequest)) return request;
+                    else if (request instanceof IDBIndex)
+                        return AsyncIndexedDB.proxy(obj.index(...params));
+                    else
+                        // functions that do not return a cursor or an index are just turned into Promises.
                         return new Promise((resolve, reject) => {
                             request.onsuccess = e => resolve(request.result);
                             request.onerror = e => reject(e);
                         });
-                    }
+                }
             },
         });
     }
