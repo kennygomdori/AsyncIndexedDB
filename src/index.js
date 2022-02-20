@@ -1,4 +1,4 @@
-class AsyncIndexedDB {
+export default class AsyncIndexedDB {
     // return opened database with schema definitions given.
     constructor(db_name, schema, version) {
         this.name = db_name;
