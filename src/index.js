@@ -39,39 +39,37 @@ export default class AsyncIndexedDB {
                 if (!(obj[prop] instanceof Function)) return obj[prop];
                 return function (...params) {
                     const request = obj[prop](...params);
+	                if (request instanceof IDBIndex)
+		                return AsyncIndexedDB.proxy(obj.index(...params));
                     // When a cursor supposed to be returned, return an AsyncIterable instead.
                     // e.g. for await (let {key, value, primaryKey} of await this.query().openCursor()) { ... }
-                    if (request instanceof IDBCursor)
-                        return new Promise((resolve, reject) => {
-                            request.onsuccess = e => {
-                                let cursor = request.result;
+                    return new Promise((resolve, reject) => {
+                        request.onsuccess = e => {
+                            let result = request.result;
+                            if (result instanceof IDBCursor)
                                 resolve({
-                                    request, cursor,
+                                    request, 
+	                                cursor: result,
                                     [Symbol.asyncIterator]: async function* () {
                                         let promise;
-                                        while (cursor) {
-                                            yield {key: cursor.key, value: cursor.value, primaryKey: cursor.primaryKey};
+                                        while (result) {
+                                            yield {key: result.key, value: result.value, primaryKey: result.primaryKey};
                                             promise = new Promise((resolve, reject) => {
                                                 request.onsuccess = e => resolve()
                                                 request.onerror = e => reject(e);
                                             });
-                                            cursor.continue();
+                                            result.continue();
                                             await promise;
-                                            cursor = request.result
+                                            result = request.result
                                         }
                                     }
-                                })
-                            }
-                            request.onerror = e => reject(e);
-                        })
-                    else if (request instanceof IDBIndex)
-                        return AsyncIndexedDB.proxy(obj.index(...params));
-                    else
-                        // functions that do not return a cursor or an index are just turned into Promises.
-                        return new Promise((resolve, reject) => {
-                            request.onsuccess = e => resolve(request.result);
-                            request.onerror = e => reject(e);
-                        });
+                                });
+                            else
+	                            // functions that do not return a cursor or an index are just turned into Promises.
+	                            resolve(result);
+                        }
+                        request.onerror = e => reject(e);
+                    });
                 }
             },
         });

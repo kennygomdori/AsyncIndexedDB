@@ -115,10 +115,10 @@ await db.open();
 
 const query = db.query('blog_posts')
 await query.put({
-	id: post_id.value,
-	title: post_title.value,
+	id: 1,
+	title: 'title',
 	time: Date.now(),
-	data: post_body.value
+	data: 'body'
 });
 
 // get all records and iterate over them.
