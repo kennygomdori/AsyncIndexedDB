@@ -10,7 +10,7 @@ export default class AsyncIndexedDB {
 
     open() {
         return new Promise((resolve, reject) => {
-            const db_request = indexedDB.open(this.name, this.version);
+            const db_request = self.indexedDB.open(this.name, this.version);
             const schema = this.schema;
             db_request.onerror = (event) => reject(event);
             db_request.onsuccess = (event) => {
@@ -109,7 +109,7 @@ export default class AsyncIndexedDB {
 
     async clear() {
         return new Promise((resolve, reject) => {
-            const request = window.indexedDB.deleteDatabase(this.name);
+            const request = self.indexedDB.deleteDatabase(this.name);
             request.onsuccess = resolve;
             request.onerror = reject;
         })

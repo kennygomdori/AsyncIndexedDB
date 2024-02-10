@@ -126,8 +126,10 @@ for (let record of await query.getAll()) {
 	console.log(record);
 }
 
+const cursor = await query.openCursor();
+
 // get a cursor and iterate over the objectStore in another thread.
-for await (let {value} of await query.openCursor()) {
+for await (let {value} of cursor) {
 	console.log(value)
 }
 ```
