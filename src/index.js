@@ -24,12 +24,12 @@ export default class AsyncIndexedDB {
     }
 
     // returns an ObjectStore proxy whose methods are awaitable.
-    query(objectStoreNames = this.db.objectStoreNames, oncomplete, onerror, mode = "readwrite") {
+    query(objectStoreName, mode = "readwrite", oncomplete, onerror) {
         // e.g. await this.query().getAll()
-        const transaction = this.db.transaction(objectStoreNames, mode);
+        const transaction = this.db.transaction(objectStoreName, mode);
         if (oncomplete instanceof Function) transaction.oncomplete = oncomplete;
         if (onerror instanceof Function) transaction.onerror = onerror;
-        return AsyncIndexedDB.proxy(transaction.objectStore(objectStoreNames))
+        return AsyncIndexedDB.proxy(transaction.objectStore(objectStoreName))
     }
 
     static proxy(obj) {

@@ -17,9 +17,11 @@ A simple, asynchronous wrapper around Javascript IndexedDB. Less than 6kb un-min
 
 ### class **AsyncIndexedDB**(db_name: str, schema: Function, version: Int)
 Create a IndexedDB with *db_name* , and the *schema*, the *version* number. *version* is a positive integer.
+
 #### *async* open()
 Initializes the database by opening and applying its *schema* if the database is new, or the *version* has increased.
-#### query(objectStoreNames: Array = this.db.objectStoreNames, mode = "readwrite", oncomplete: Function, onerror: Function)
+
+#### query(objectStoreName: string, mode = "readwrite", oncomplete: Function, onerror: Function)
 Opens a transaction, and creates a ObjectStore proxy. Mode can be either "readwrite" or "readonly". *oncomplete* and *onerror* are called when transaction succeeds and when it fails, respectively. The proxy has all the properties and methods of the original IDBObjectStore, but the asynchronous equivalents in place of the event-based methods.
 
 #### *async* import(data: Array)

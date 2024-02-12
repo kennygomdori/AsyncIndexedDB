@@ -1,6 +1,6 @@
 {
   "name": "async-indexed-db",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "An asynchronous wrapper for IndexedDB",
   "main": "dist/AsyncIndexedDB.min.js",
   "module": "dist/AsyncIndexedDB.module.min.js",
